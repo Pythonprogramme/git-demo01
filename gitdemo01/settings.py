@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'basiweb',
+    'basicweb',
     'mainweb',
     'orderweb'
 ]
@@ -81,9 +81,19 @@ WSGI_APPLICATION = 'gitdemo01.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # },
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        # 'NAME': BASE_DIR / 'fullstack',
+        'NAME': 'fullstack',
+        'USER': 'root',
+        'PASSWORD': 'root',
+        'HOST': '127.0.0.1',
+        'POST': '3306'
+
     }
 }
 
@@ -126,7 +136,18 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+
+#  注册静态目录
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR,'apps','static'),
+]
+
+# 设置 x-Frame_option 选项
+X_FRAME_OPTIONS = 'SAMEOR'
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+

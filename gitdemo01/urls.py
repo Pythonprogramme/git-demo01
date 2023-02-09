@@ -15,7 +15,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+# 引入 include
+from django.urls import include
+
+# 引入三个app的 views
+# from apps.basicweb import views as basic_views
+# from apps.mainweb import views as main_views
+# from apps.orderweb import views as order_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+#   基础数据
+    path('basic/',include('apps.basicweb.urls')),
+#   用户角色
+    path('main/',include('apps.mainweb.urls')),
+#   订单管理
+    path('order/',include('apps.orderweb.urls'))
 ]
