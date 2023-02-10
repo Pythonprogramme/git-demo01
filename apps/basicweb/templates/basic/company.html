@@ -2,11 +2,180 @@
 {% extends 'basic/layout/basic_base_page.html' %}
 {% block title %} 公司管理 {% endblock %}
 {# 添加当前页面的css#}
-{% block css %} {% endblock %}
+{% block css %}
+    <style>
+    .contentArea i:hover {
+        color: red;
+        font-weight: bold;
+    }
+    </style>
+{% endblock %}
 {# 添加面包屑导航名称#}
 {% block breadcrumb %} 公司管理 {% endblock %}
 {# 添加当前页面的内容#}
 {% block content %}
+{#    展示公司管理数据#}
+    <div class="contentArea">
+    </div>
 {% endblock %}
 {# 添加当前页面的js#}
-{% block js %} {% endblock %}
+{% block js %}
+    <script>
+        // 入口函数
+        $(function (){
+            //加载公司数据展示在页面
+            loadData();
+            // 响应按钮点击
+            buttonClick();
+        });
+        // 加载数据
+        function loadData() {
+            // 使用异步请求获取数据
+            $.ajax({
+                url: "{% url 'list_company' %}",
+                method: 'get',
+                dataType: 'json',
+                success: function (res) {
+                    console.log(res)
+                    // 判断
+                    if (res.status) {
+                        showInPage(res.data);
+                    }else {
+                        alert(res.error)
+                    }
+                }
+            })
+        }
+        // 将公司信息拼接成块状显示
+        function showInPage(data) {
+            // 获取对象
+            let targetContainer = $('.contentArea');
+            // 清空集合
+            targetContainer.empty();
+            // 遍历
+            $.each(data, function (name, value) {
+
+                // 新建一个外层的集合
+                let child = $('<div>').attr('class', 'layui-col-xs6 layui-col-sm6 layui-col-md4 layui-col-lg2').css('margin-bottom', '20px');
+                // 新建一个子集集合
+                let childInner = $('<div>').attr('style', 'width: 80%;height: 200px;background-color:lightblue;border-radius: 10px;margin: auto;text-align: center;font-size:18px;').appendTo(child);
+                // 新建一个div
+                $('<div>').text(value.name).attr('name', value.id).attr('style', 'font-weight: bold;color:darkred;line-height:80px;').appendTo(childInner);
+                // 附加专业数量
+                $('<div>').html("岗位数：" + value.number).attr('style', 'line-height:80px').appendTo(childInner);
+                // 附加
+                $('<i>').attr('id', 'btnEdit').attr('name', value.name).attr('code',value.id).attr('class', 'layui-icon layui-icon-edit').appendTo(childInner);
+                $('<span>').html("&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp").appendTo(childInner);
+                $('<i>').attr('id', 'btnEdit').attr('name', value.id).attr('class', 'layui-icon layui-icon-delete').appendTo(childInner);
+                // 附加到
+                child.appendTo(targetContainer);
+
+            });
+        }
+        // 响应按钮点击
+        function buttonClick() {
+            // 查询按钮
+            $('#btnQuery').on('click',function (){
+                // 使用异步请求获取数据
+            $.ajax({
+                url: "{% url 'list_company' %}",
+                method: 'post',
+                data:{
+                    'queryStr': $('#queryStr').val().replace(" ",""),
+                    'csrfmiddlewaretoken': "{{ csrf_token }}"
+
+                },
+                dataType: 'json',
+                success: function (res) {
+                    console.log(res)
+                    // 判断
+                    if (res.status) {
+                        showInPage(res.data);
+                    }else {
+                        alert(res.error)
+                    }
+                }
+            })
+            })
+            // 全部按钮
+            $('#btnAll').on('click',function (){
+                // 页面重现加载
+                location.reload();
+            })
+            // 添加按钮
+            $('#btnAdd').on('click',function (){
+                // 弹出框输入
+                layui.use('layer',function (){
+                    // 输入框
+                    layer.prompt({
+                        title: '请输入部门名称，并确定！',
+                        area: ['300px','100px'],
+                        // 0--单行  1--密码  2--多行
+                        formType: 0,
+                    },  function (value,index,elem){
+                            // 使用 ajax 将名称提交到后台
+                            $.ajax({
+                                url: "{% url 'add_company'%}",
+                                method: "post",
+                                data: {
+                                    name: value,
+                                    'csrfmiddlewaretoken': "{{ csrf_token }}"
+                                },
+                                dataType: 'json',
+                                success: function (res) {
+                                    {#console.log(res)#}
+                                    // 判断
+                                    if (res.status) {
+                                        layer.close(index);
+                                        // 重新加载页面
+                                        location.reload()
+                                    }else {
+                                        alert(res.error)
+                                    }
+                                }
+                            });
+                            layer.close(index);//关闭
+                    })
+                })
+            })
+            // 修改按钮
+            $('body').on('click','#btnEdit',function (){
+                // 获取当前 id
+                let id = $(this).attr('code')
+                let name = $(this).attr('name')
+                // 弹出层
+                layui.use('layer',function (){
+                    layer.prompt({
+                        title: '修改部门名称，然后确定！',
+                        value: name,
+                        area: ['300px','100px'],
+                        formType:0,
+                    }, function (value,index,elem){
+                        // 开始  Ajax请求
+                        $.ajax({
+                            url: "{% url 'edit_company'%}",
+                            method: "post",
+                            data: {
+                                id: id,
+                                name: value,
+                                'csrfmiddlewaretoken': "{{ csrf_token }}"
+                            },
+                            dataType: 'json',
+                            success: function (res) {
+                                {#console.log(res)#}
+                                // 判断
+                                if (res.status) {
+                                    layer.close(index);
+                                    // 重新加载页面
+                                    location.reload()
+                                }else {
+                                    alert(res.error)
+                                }
+                            }
+                            });
+                    })
+                })
+            })
+        }
+    </script>
+{% endblock %}

@@ -5,6 +5,9 @@ from apps.basicweb.views import company,position
 urlpatterns = [
     #  公司管理
     path('company/',company.index, name="company"),
+    path('company/list/',company.list_values, name="list_company"),
+    path('company/add/',company.add_value, name="add_company"),
+    path('company/edit/',company.edit_value, name="edit_company"),
     # 人员职位
     path('position/',position.index, name="position")
 ]
