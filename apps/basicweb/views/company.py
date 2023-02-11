@@ -57,3 +57,14 @@ def edit_value(request):
         return JsonResponse({'status': True})
     except Exception as e:
         return JsonResponse({'status': False,'error':'修改提交数据出现错误，具体原因:'+str(e)})
+
+# 删除部门信息
+def del_value(request):
+    # 获取 id
+    id = request.POST.get('id')
+    # 删除
+    try:
+        company.objects.get(id=id).delete()
+        return JsonResponse({'status':True})
+    except Exception as e:
+        return JsonResponse({'status':False,'error':'删除提交到数据库出现异常！具体原因:'+str(e)})

@@ -66,7 +66,7 @@
                 // 附加
                 $('<i>').attr('id', 'btnEdit').attr('name', value.name).attr('code',value.id).attr('class', 'layui-icon layui-icon-edit').appendTo(childInner);
                 $('<span>').html("&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp").appendTo(childInner);
-                $('<i>').attr('id', 'btnEdit').attr('name', value.id).attr('class', 'layui-icon layui-icon-delete').appendTo(childInner);
+                $('<i>').attr('id', 'btnDel').attr('name', value.name).attr('code',value.id).attr('class', 'layui-icon layui-icon-delete').appendTo(childInner);
                 // 附加到
                 child.appendTo(targetContainer);
 
@@ -175,6 +175,41 @@
                             });
                     })
                 })
+            })
+            // 删除按钮
+            $('body').on('click','#btnDel',function (){
+                // 获取当前 id
+                let id = $(this).attr('code');
+                let name = $(this).attr('name');
+                let confirmStr = "您是否确定删除院系信息【"+name+"】?";
+                // 弹出确认删除的提示框
+                layui.use('layer', function (){
+                    layer.confirm(confirmStr, {icon:3, title:"确认删除！"}, function (index){
+                        // ajax请求
+                        $.ajax({
+                            url: "{% url 'del_company'%}",
+                            method: "post",
+                            data: {
+                                id: id,
+                                'csrfmiddlewaretoken': "{{ csrf_token }}"
+                            },
+                            dataType: 'json',
+                            success: function (res) {
+                                {#console.log(res)#}
+                                // 判断
+                                if (res.status) {
+                                    // 关闭弹出框
+                                    layer.close(index);
+                                    // 重新加载页面
+                                    location.reload();
+                                }else {
+                                    alert(res.error)
+                                }
+                            }
+                            });
+                    })
+                })
+
             })
         }
     </script>

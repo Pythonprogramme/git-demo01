@@ -8,6 +8,8 @@ urlpatterns = [
     path('company/list/',company.list_values, name="list_company"),
     path('company/add/',company.add_value, name="add_company"),
     path('company/edit/',company.edit_value, name="edit_company"),
+    path('company/del/',company.del_value, name="del_company"),
     # 人员职位
-    path('position/',position.index, name="position")
+    path('position/',position.index, name="position"),
+    path('position/list/',position.list_value, name="list_position")
 ]
