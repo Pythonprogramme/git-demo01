@@ -16,6 +16,7 @@ class company(models.Model):
 # 人员职位
 class position(models.Model):
     name = models.CharField(verbose_name="岗位名称",max_length=100,unique=True,null=False)
+    Personal_name = models.CharField(verbose_name="人员姓名",max_length=100,unique=True,null=False)
     company = models.ForeignKey(verbose_name="所属部门", to=company,on_delete=models.PROTECT)
 
     class Meta:
@@ -26,4 +27,4 @@ class position(models.Model):
         verbose_name_plural = "Major"
 
     def __str__(self):
-        return '%s' % self.name
+        return '%s' % self.name,self.Personal_name

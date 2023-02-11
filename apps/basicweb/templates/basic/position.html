@@ -20,6 +20,30 @@
           <i class="layui-icon layui-icon-delete"></i> 删除
       </a>
     </script>
+
+{#   弹出层内容#}
+    <div id="layerContent" style="display: none; padding: 30px 40px 0 0">
+        <form action="" class="layui-form">
+            <div class="layui-form-item">
+                <label  class="layui-form-label" for="company">部门名称：</label>
+                <div class="layui-input-block">
+                    <input type="text" id="company" name="company" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label  class="layui-form-label" for="company">岗位名称：</label>
+                <div class="layui-input-block">
+                    <input type="text" id="company" name="company" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label  class="layui-form-label" for="company">员工姓名：</label>
+                <div class="layui-input-block">
+                    <input type="text" id="company" name="company" class="layui-input">
+                </div>
+            </div>
+        </form>
+    </div>
 {% endblock %}
 {# 添加当前页面的js#}
 {% block js %}
@@ -28,9 +52,11 @@
         $(function (){
             // 初始化表格
             initTable();
+            // 响应按钮点击事件
+            buttonClick()
         })
         // 初始化表格
-        function initTable(){
+        function initTable(queryStr=''){
             // 使用 table 插件
             layui.use('table',function (){
                 // 实例化一个表格对象
@@ -40,12 +66,18 @@
                     elem: '#tableArea'
                     // 请求数据后台接口
                     ,url: "{% url 'list_position' %}"
+                    ,method: 'post'
+                    ,where: {
+                        inputStr: queryStr,
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    }
                     // 不同行背景不同显示
                     ,even: true // 表格斑马线效果
                     ,cols: [[
                         {type:'numbers', width:60, align: 'center', title: '编号', sort: true}
                         ,{field:'company__name', width:280,align: 'center', title: '部门名称',sort: true}
                         ,{field:'name', title: '职位名称', align: 'center',sort: true}
+                        ,{field:'Personal_name', title: '员工姓名', align: 'center',sort: true}
                         ,{fixed: 'right', title: '操作',width:'20%', align:'center', toolbar: '#tableButton'}
                     ]]
                     // **是否显示顶部工具栏 （可直接导出）
@@ -64,6 +96,76 @@
                     }
                 })
             })
+        }
+
+        // 响应按钮点击事件
+        function buttonClick() {
+            // 查询按钮
+            $('#btnQuery').on('click',function (){
+                // 获取文本框的值
+                let inputStr = $('#queryStr').val()
+                initTable(inputStr)
+            })
+            // 全部按钮
+            $('#btnAll').on('click',function (){
+                // 页面重新加载
+                location.reload();
+            })
+            // 添加按钮
+            $('#btnAdd').on('click',function (){
+                // 加载弹出层
+                loadLayer();
+            })
+
+
+        }
+        // 展示加载 弹出层
+        function loadLayer(){
+             layui.use('layer',function (){
+            // 实例化一个弹出层对象
+                let layer = layui.layer;
+                // 展示
+                layer.open({
+                    type:  1,
+                    title: '添加信息',
+                    area: ['40%','40%'],
+                    btn: ['确定','取消'],
+                    content: $('#layerContent'),
+                    // 设置弹出层的其他区域的颜色
+                    shade: [0.6, '#000000'],
+                    // 点击其他区域是否关闭弹窗层
+                    shadeClose: false,
+                    // 弹出框入场动画
+                    anim: 5,
+                    resize:  false,
+                    // 响应的函数
+                    success:  function (layero, index){
+                        // 弹出层加载后自动执行的回调函数
+
+                    },
+                    // 确定按钮回调方法
+                    yes: function (index,layero){
+                        // 点击确定按钮的事件响应
+
+                    },
+                    btn1: function (index,layero){
+                        // 点击第一个按钮的事件响应
+
+                    },
+                    btn2: function (index,layero){
+                        // 点击第二个按钮的事件响应
+
+                    },
+                    cancel: function (index,layero){
+                        // 点击右上角‘x’按钮的事件响应
+
+                    },
+                    end: function (index,layero){
+                        // 弹出层销毁后自动执行的函数
+
+                    }
+                })
+        })
         }
     </script>
 

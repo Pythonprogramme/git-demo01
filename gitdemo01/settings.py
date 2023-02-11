@@ -88,7 +88,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         # 'NAME': BASE_DIR / 'fullstack',
-        'NAME': 'fullstack',
+        'NAME': 'jztdata',
         'USER': 'root',
         'PASSWORD': 'root',
         'HOST': '127.0.0.1',
