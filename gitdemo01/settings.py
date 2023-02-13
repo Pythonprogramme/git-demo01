@@ -143,7 +143,8 @@ STATICFILES_DIRS = [
 ]
 
 # 设置 x-Frame_option 选项
-X_FRAME_OPTIONS = 'SAMEOR'
+# X_FRAME_OPTIONS = 'SAMEOR'
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 
 # Default primary key field type

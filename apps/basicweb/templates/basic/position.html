@@ -10,7 +10,7 @@
 {# 添加当前页面的内容#}
 {% block content %}
 {#    基本信息#}
-    <table class="layui-hide" id="tableArea"></table>
+    <table class="layui-hide" id="tableArea" lay-filter="tableDemo"></table>
 {#  表格中的按钮#}
     <script type="text/html" id="tableButton">
       <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit">
@@ -23,7 +23,7 @@
 
 {#   弹出层内容#}
     <div id="layerContent" style="display: none; padding: 30px 40px 0 0">
-        <form action="" class="layui-form" id="layerForm">
+        <form action="" class="layui-form" id="layerForm" lay-filter="layerForm">
             <div class="layui-form-item">
                 <label  class="layui-form-label" for="company">部门名称：</label>
                 <div class="layui-input-block">
@@ -31,6 +31,12 @@
                     <select name="company" id="company" lay-search="">
 
                     </select>
+                </div>
+            </div>
+            <div class="layui-form-item" style="display: none">
+                <label  class="layui-form-label" for="position_id">岗位编号：</label>
+                <div class="layui-input-block">
+                    <input type="text" id="position_id" name="position_id" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item">
@@ -51,6 +57,8 @@
 {# 添加当前页面的js#}
 {% block js %}
     <script>
+        // 定义一个全局变量标识是添加还是修改 1-添加 2-修改
+        let Operation = 0;
         // 入口函数
         $(function (){
             // 初始化表格
@@ -98,6 +106,22 @@
                         $('thead tr').css({'background-color': '#009688','color': 'white'})
                     }
                 })
+                // 侦听表格的操作 --按钮点击
+                table.on('tool(tableDemo)', function (obj){
+                    // 获取操作行数据
+                    let oneLineData = obj.data;
+                    // 判断是点击什么按钮
+                    if(obj.event === 'edit'){
+                        // 编辑按钮
+                        Operation = 2;
+                        {#alert(oneLineData.name+oneLineData.Personal_name)#}
+                        loadLayer(oneLineData);
+                    } else if (obj.event === 'del'){
+                        // 删除按钮
+                        {#alert('点击了删除按钮')#}
+                        deleteValue(oneLineData);
+                    }
+                })
             })
         }
 
@@ -116,14 +140,21 @@
             })
             // 添加按钮
             $('#btnAdd').on('click',function (){
+                // 修改Openstion
+                Operation = 1;
                 // 加载弹出层
                 loadLayer();
             })
-
-
         }
         // 展示加载 弹出层
-        function loadLayer(){
+        function loadLayer(value=''){
+            // 判断是添加还是修改
+            let titleStr = ''
+            if(Operation === 1 ){
+                titleStr = '添加数据'
+            }else if(Operation === 2){
+                titleStr = '修改数据'
+            }
              layui.use(['layer','form'],function (){
             // 实例化一个弹出层对象
                 let layer = layui.layer;
@@ -131,7 +162,7 @@
                 // 展示
                 layer.open({
                     type:  1,
-                    title: '添加信息',
+                    title: titleStr,
                     area: ['40%','40%'],
                     btn: ['确定','取消'],
                     content: $('#layerContent'),
@@ -154,14 +185,25 @@
                                 if (res.status){
                                     // 获取要放置的父容器
                                     let parentCentainer = $('#company')
+                                    // 清空下拉选项
+                                    parentCentainer.html("");
                                     //使用 jquery 拼接成 option标签写入 select
-                                    $('<option>').attr('value', '').text("直接选择或搜索选择").appendTo(parentCentainer)                               //使用 jquery 拼接成 option标签写入 select
-
+                                    $('<option>').attr('value', '').text("请在现有的部门中直接选择或搜索选择").appendTo(parentCentainer)
                                     //遍历
                                     $.each(res.data, function (index, value){
                                         // 使用 jquery创建option标签
                                         $('<option>').attr('value', value.id).text(value.name).appendTo(parentCentainer);
                                     })
+                                    // 修改时 ---为表单 赋值
+                                    if(Operation === 2){
+                                        form.val('layerForm', {
+                                            'company' : value.company_id,
+                                            'position': value.name,
+                                            'position_name': value.Personal_name,
+                                            'position_id': value.id
+
+                                        })
+                                    }
                                     // 重新渲染表单
                                     form.render();
                                 } else {
@@ -174,7 +216,9 @@
                     yes: function (index,layero){
                         // 点击确定按钮的事件响应
                         // 添加的提交
-                        $.ajax({
+                        if(Operation === 1){
+                            // 添加的提交
+                            $.ajax({
                             url: '{% url 'add_position' %}',
                             method: 'post',
                             data: $('#layerForm').serialize(),
@@ -189,6 +233,25 @@
                                 }
                             }
                         })
+                        } else if (Operation ===2){
+                            // 修改的提交
+                            $.ajax({
+                            url: '{% url 'edit_position' %}',
+                            method: 'post',
+                            data: $('#layerForm').serialize(),
+                            dataType: 'json',
+                            success: function (res){
+                                if (res.status){
+                                    // 重新加载页面
+                                    location.reload();
+                                } else {
+                                    // 错误提示
+                                    layer.msg(res.error,{icon:2, area: ['350px','150px'], time: -1, btn: ['关闭']})
+                                }
+                            }
+                        })
+                        }
+
                     },
                     btn1: function (index,layero){
                         // 点击第一个按钮的事件响应
@@ -204,10 +267,44 @@
                     },
                     end: function (index,layero){
                         // 弹出层销毁后自动执行的函数
-
+                        form.val('layerForm', {
+                            // 弹出层置空
+                            'company' : -1,
+                            'position': '',
+                            'position_name': '',
+                            'position_id': ''
+                        })
                     }
                 })
         })
+        }
+        // 实现数据的删除
+        function deleteValue(value){
+            // 用户确认
+            layui.use('layer',function (){
+                // 删除确认的字符串
+                let confirmStr = "您确认删除 专业【" + value.id + "-" + value.name+"】数据吗？"
+                // 用户确认
+                layer.confirm(confirmStr,{icon:3, area:['350px','200px']}, function (index){
+                    // 实现 Ajax
+                    $.ajax({
+                        url: '{% url 'del_position' %}',
+                        method: 'POST',
+                        data: {
+                            id: value.id,
+                            csrfmiddlewaretoken: "{{ csrf_token }}"
+                        },
+                        dataType: 'json',
+                        success: function (res){
+                            if(res.status){
+                                location.reload();
+                            } else {
+                                layer.msg(res.error, {icon: 2,area:['350px','150px'],item: -1, btn: ['关闭']})
+                            }
+                        }
+                    })
+                })
+            })
         }
     </script>
 

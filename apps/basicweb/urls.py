@@ -12,5 +12,7 @@ urlpatterns = [
     # 人员职位
     path('position/',position.index, name="position"),
     path('position/list/',position.list_value, name="list_position"),
-    path('position/add/',position.add_value, name="add_position")
+    path('position/add/',position.add_value, name="add_position"),
+    path('position/edit/',position.edit_value, name="edit_position"),
+    path('position/del/',position.del_value, name="del_position")
 ]
