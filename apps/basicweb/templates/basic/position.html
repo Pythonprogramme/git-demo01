@@ -14,7 +14,7 @@
 {#  表格中的按钮#}
     <script type="text/html" id="tableButton">
       <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit">
-          <i class="layui-icon layui-icon-edit"></i> 编辑
+          <i class="layui-icon layui-icon   -edit"></i> 编辑
       </a>
       <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">
           <i class="layui-icon layui-icon-delete"></i> 删除
@@ -23,23 +23,26 @@
 
 {#   弹出层内容#}
     <div id="layerContent" style="display: none; padding: 30px 40px 0 0">
-        <form action="" class="layui-form">
+        <form action="" class="layui-form" id="layerForm">
             <div class="layui-form-item">
                 <label  class="layui-form-label" for="company">部门名称：</label>
                 <div class="layui-input-block">
-                    <input type="text" id="company" name="company" class="layui-input">
+{#                    <input type="text" id="company" name="company" class="layui-input">#}
+                    <select name="company" id="company" lay-search="">
+
+                    </select>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label  class="layui-form-label" for="company">岗位名称：</label>
+                <label  class="layui-form-label" for="position">岗位名称：</label>
                 <div class="layui-input-block">
-                    <input type="text" id="company" name="company" class="layui-input">
+                    <input type="text" id="position" name="position" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item">
-                <label  class="layui-form-label" for="company">员工姓名：</label>
+                <label  class="layui-form-label" for="position_name">员工姓名：</label>
                 <div class="layui-input-block">
-                    <input type="text" id="company" name="company" class="layui-input">
+                    <input type="text" id="position_name" name="position_name" class="layui-input">
                 </div>
             </div>
         </form>
@@ -121,9 +124,10 @@
         }
         // 展示加载 弹出层
         function loadLayer(){
-             layui.use('layer',function (){
+             layui.use(['layer','form'],function (){
             // 实例化一个弹出层对象
                 let layer = layui.layer;
+                let form = layui.form;
                 // 展示
                 layer.open({
                     type:  1,
@@ -141,12 +145,50 @@
                     // 响应的函数
                     success:  function (layero, index){
                         // 弹出层加载后自动执行的回调函数
+                        // 自动获取所有部门信息
+                        $.ajax({
+                            url: '{% url 'list_company' %}',
+                            method: 'get',
+                            dataType: 'json',
+                            success: function (res){
+                                if (res.status){
+                                    // 获取要放置的父容器
+                                    let parentCentainer = $('#company')
+                                    //使用 jquery 拼接成 option标签写入 select
+                                    $('<option>').attr('value', '').text("直接选择或搜索选择").appendTo(parentCentainer)                               //使用 jquery 拼接成 option标签写入 select
 
+                                    //遍历
+                                    $.each(res.data, function (index, value){
+                                        // 使用 jquery创建option标签
+                                        $('<option>').attr('value', value.id).text(value.name).appendTo(parentCentainer);
+                                    })
+                                    // 重新渲染表单
+                                    form.render();
+                                } else {
+                                    layer.msg('部门信息获取失败：',{icon:2, area: ['350px','150px'], time: -1, btn: ['关闭']})
+                                }
+                            }
+                        })
                     },
                     // 确定按钮回调方法
                     yes: function (index,layero){
                         // 点击确定按钮的事件响应
-
+                        // 添加的提交
+                        $.ajax({
+                            url: '{% url 'add_position' %}',
+                            method: 'post',
+                            data: $('#layerForm').serialize(),
+                            dataType: 'json',
+                            success: function (res){
+                                if (res.status){
+                                    // 重新加载页面
+                                    location.reload();
+                                } else {
+                                    // 错误提示
+                                    layer.msg(res.error,{icon:2, area: ['350px','150px'], time: -1, btn: ['关闭']})
+                                }
+                            }
+                        })
                     },
                     btn1: function (index,layero){
                         // 点击第一个按钮的事件响应

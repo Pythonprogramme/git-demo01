@@ -10,7 +10,6 @@ from django.db.models import Q
 
 def index(request):
     return render(request, 'basic/position.html')
-
 # 获取模块
 def list_value(request):
     # 数据分页
@@ -26,3 +25,15 @@ def list_value(request):
     res = {'code':0,'count':len(objs), 'data':obj_one_page}
     # 返回数据
     return JsonResponse(res)
+# 添加岗位
+def add_value(request):
+    # 获取传递过来的值
+    company_val = request.POST.get('company')
+    position_val = request.POST.get('position')
+    position_name = request.POST.get('position_name')
+    # 写入数据库
+    try:
+        position.objects.create(company_id=company_val,name=position_val,Personal_name=position_name)
+        return JsonResponse({'status':True})
+    except Exception as e:
+        return JsonResponse({'status':False, 'error':'添加数据到数据库出现异常，具体原因：'+str(e)})
