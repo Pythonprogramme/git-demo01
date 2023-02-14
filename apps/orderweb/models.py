@@ -3,12 +3,12 @@ from apps.basicweb.models import company,position
 
 # 订单的类
 class Order(models.Model):
+    order_number = models.CharField(verbose_name="订单编号", primary_key=True, max_length=100)
+    sj_name = models.CharField(verbose_name="收件姓名", max_length=100)
+    sj_mobile = models.CharField(verbose_name="收件电话", max_length=100)
     order_date = models.DateField(verbose_name="订单日期")
-    sj_name = models.CharField(verbose_name="收件姓名",max_length=100)
-    sj_mobile = models.CharField(verbose_name="收件电话",max_length=100)
     sj_address = models.CharField(verbose_name="收件地址", max_length=500)
     product_name = models.CharField(verbose_name="商品名称",max_length=250)
-    order_number = models.CharField(verbose_name="订单编号",primary_key=True,max_length=100)
     price = models.FloatField(verbose_name="价格")
     payment_method = models.CharField(verbose_name="付款方式", max_length=100)
     jf_date = models.DateField(verbose_name="进粉日期")

@@ -1,11 +1,102 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<h1>财务订单</h1>
-</body>
-</html>
+{% extends 'order/layout/order_base_page.html' %}
+
+{% block title %}
+财务订单
+{% endblock %}
+
+{#  添加css  #}
+{% block css %}
+
+{% endblock %}
+
+{# 设置面包屑导航名称 #}
+{% block breadcrumb %}
+财务订单
+{% endblock %}
+
+{# 添加内容 #}
+{% block content %}
+    {#  表格数据  #}
+    <div class="layui-hide" id="tableComplete">
+ {#  表格中的按钮#}
+    <script type="text/html" id="tableButton">
+        <a class="layui-btn layui-btn layui-btn-xs" lay-event="edit">
+            <i class="layui-icon layui-icon-more"></i> 查看
+        </a>
+        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit">
+            <i class="layui-icon layui-icon-edit"></i> 编辑
+        </a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">
+            <i class="layui-icon layui-icon-delete"></i> 删除
+        </a>
+    </script>
+
+    </div>
+{% endblock %}
+
+{# 添加js #}
+{% block js %}
+    <script>
+        // 入口函数
+        $(function (){
+            // 初始化表格
+            initTable();
+        });
+        // 函数实现
+        function initTable(){
+            // 使用table插件
+            layui.use('table',function (){
+                // 实例化表格
+                let table = layui.table;
+                // 渲染表格
+                table.render({
+                    elem: '#tableComplete'
+                    // 请求数据后台接口
+                    ,url: "{% url 'list_finance' %}"
+                    ,method: "post"
+                    ,where: {
+                        {#inputStr: queryStr,#}
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    }
+                    ,cols: [[
+                        {type:'numbers', width:60, align: 'center', title: '编号', sort: true}
+                        ,{field:'order_number',align: 'center', title: '订单编号',sort: true}
+                        ,{field:'sj_name', title: '收件姓名', align: 'center',sort: true}
+                        {#,{field:'sj_mobile', title: '收件电话', align: 'center',sort: true}#}
+                        ,{field:'order_date',align: 'center', title: '订单日期',sort: true}
+                        {#,{field:'sj_address', title: '收件地址', align: 'center',sort: true}#}
+                        ,{field:'product_name', title: '商品名称', align: 'center',sort: true}
+                        ,{field:'price',align: 'center', title: '价格',sort: true}
+                        ,{field:'payment_method', title: '付款方式', align: 'center',sort: true}
+                        {#,{field:'jf_date', title: '进粉日期', align: 'center',sort: true}#}
+                        {#,{field:'jz_name',align: 'center', title: '金主姓名',sort: true}#}
+                        {#,{field:'remarks', title: '八字/供灯/排位/发会/财库', align: 'center',sort: true}#}
+                        {#,{field:'write_state', title: '书写状态', align: 'center',sort: true}#}
+                        {#,{field:'kg_date',align: 'center', title: '开光日期',sort: true}#}
+                        {#,{field:'sy_remark', title: '寺院备注', align: 'center',sort: true}#}
+                        {#,{field:'fh_remark', title: '发货备注', align: 'center',sort: true}#}
+                        ,{field:'service_name', title: '客服姓名', align: 'center',sort: true}
+                        {#,{field:'fh_data', title: '发货日期', align: 'center',sort: true}#}
+                        {#,{field:'courier_number', title: '快递单号', align: 'center',sort: true}#}
+                        {#,{field:'shipping_status', title: '发货状态', align: 'center',sort: true}#}
+                        {#,{field:'number', title: '数量', align: 'center',sort: true}#}
+                        ,{fixed: 'right', title: '操作', align:'center', toolbar: '#tableButton',width: '20%'}
+                    ]]
+                    // 不同行背景不同显示
+                    ,even: true // 表格斑马线效果
+                    // **是否显示顶部工具栏 （可直接导出）
+                    ,toolbar: true
+                    // 表头样式显示
+                    ,done: function (res, current, count){
+                        $('thead tr').css({'background-color': '#009688','color': 'white'})
+                    }
+                    // 分页
+                    ,page: true
+                    //设置分页的每页记录条数
+                    ,limit:12
+                    ,limits: [12,15,20,30,50,75,100]
+                })
+            })
+        }
+    </script>
+{% endblock %}
