@@ -41,9 +41,11 @@
         $(function (){
             // 初始化表格
             initTable();
+            // 响应按钮点击事件
+            buttonClick();
         });
         // 函数实现
-        function initTable(){
+        function initTable(queryStr=""){
             // 使用table插件
             layui.use('table',function (){
                 // 实例化表格
@@ -55,7 +57,7 @@
                     ,url: "{% url 'list_warehouse' %}"
                     ,method: "post"
                     ,where: {
-                        {#inputStr: queryStr,#}
+                        inputStr: queryStr,
                         csrfmiddlewaretoken: "{{ csrf_token }}"
                     }
                     ,cols: [[
@@ -80,9 +82,9 @@
                         ,{field:'courier_number', title: '快递单号', align: 'center',sort: true}
                         ,{field:'shipping_status', title: '发货状态', align: 'center',sort: true}
                         ,{field:'number', title: '数量', align: 'center',sort: true}
-                        ,{fixed: 'right', title: '操作', align:'center', toolbar: '#tableButton',width: '15%'}
+                        ,{fixed: 'right', title: '操作', align:'center', toolbar: '#tableButton',width: '8%'}
                     ]]
-                    {#,width: 4800#}
+                    ,width: 3000
                     // 不同行背景不同显示
                     ,even: true // 表格斑马线效果
                     // **是否显示顶部工具栏 （可直接导出）
@@ -97,6 +99,20 @@
                     ,limit:12
                     ,limits: [12,15,20,30,50,75,100]
                 })
+            })
+        }
+        // 按钮点击事件
+        function buttonClick() {
+            // 查询按钮
+            $('#btnQuery').on('click',function (){
+                // 获取文本框值
+                let inputStr = $('#queryStr').val();
+                initTable(inputStr)
+            })
+            // 全部按钮
+            $('#btnAll').on('click',function (){
+                // 页面重新加载
+                location.reload();
             })
         }
     </script>

@@ -41,9 +41,11 @@
         $(function (){
             // 初始化表格
             initTable();
+            // 响应按钮点击事件
+            buttonClick();
         });
         // 函数实现
-        function initTable(){
+        function initTable(queryStr=""){
             // 使用table插件
             layui.use('table',function (){
                 // 实例化表格
@@ -55,7 +57,7 @@
                     ,url: "{% url 'list_finance' %}"
                     ,method: "post"
                     ,where: {
-                        {#inputStr: queryStr,#}
+                        inputStr: queryStr,
                         csrfmiddlewaretoken: "{{ csrf_token }}"
                     }
                     ,cols: [[
@@ -96,6 +98,21 @@
                     ,limit:12
                     ,limits: [12,15,20,30,50,75,100]
                 })
+            })
+        }
+
+        // 按钮点击事件
+        function buttonClick() {
+            // 查询按钮
+            $('#btnQuery').on('click',function (){
+                // 获取文本框值
+                let inputStr = $('#queryStr').val();
+                initTable(inputStr)
+            })
+            // 全部按钮
+            $('#btnAll').on('click',function (){
+                // 页面重新加载
+                location.reload();
             })
         }
     </script>
