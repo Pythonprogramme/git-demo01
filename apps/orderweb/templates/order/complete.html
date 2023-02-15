@@ -17,32 +17,173 @@
 {# 添加内容 #}
 {% block content %}
     {#  表格数据  #}
-    <div class="layui-hide" id="tableComplete">
+    <div class="layui-hide" id="tableComplete" lay-filter="tableComplete">
     {#  表格中的按钮#}
     <script type="text/html" id="tableButton">
-        <a class="layui-btn layui-btn layui-btn-xs" lay-event="edit">
+        <a id="btnEdit" class="layui-btn layui-btn layui-btn-xs" lay-event="detail">
             <i class="layui-icon layui-icon-more"></i> 查看
         </a>
-        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit">
+        <a id="btnAdd" class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit">
             <i class="layui-icon layui-icon-edit"></i> 编辑
         </a>
-        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">
+        <a id="btnDel" class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">
             <i class="layui-icon layui-icon-delete"></i> 删除
         </a>
     </script>
 
+    </div>
+    <!--弹出层表单 -->
+    <div class="layerArea" style="display: none;padding: 40px 0 0 30px ">
+        <form class="layui-form" id="layerForm" lay-filter="layerForm">
+            {% csrf_token %}
+{#            第一行#}
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="order_number"><b>订单编号：</b></label>
+                <div class="layui-input-inline">
+                    <input type="text" id="order_number" name="order_number" class="layui-input">
+                    <span class="error-msg" style="color:red; position: absolute"></span>
+                </div>
+                <label class="layui-form-label" for="sj_name"><b>收件姓名：</b></label>
+                <div class="layui-input-inline">
+                    <input type="text" id="sj_name" name="sj_name" class="layui-input">
+                    <span class="error-msg" style="color:red; position: absolute"></span>
+                </div>
+            </div>
+{#            第二行#}
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="sj_mobile"><b>收件电话：</b></label>
+                <div class="layui-input-inline">
+                    <input type="text" id="sj_mobile" name="sj_mobile" class="layui-input">
+                    <span class="error-msg" style="color:red; position: absolute"></span>
+                </div>
+                <label class="layui-form-label" for="order_date"><b>订单日期：</b></label>
+                <div class="layui-input-inline">
+                    <input type="text" id="order_date" name="order_date" class="layui-input" placeholder="请选择日期">
+                </div>
+            </div>
+{#            第三行#}
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label" for="sj_address"><b>收件地址：</b></label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="sj_address" name="sj_address" class="layui-input" style="width:263%;">
+                        <span class="error-msg" style="color:red; position: absolute"></span>
+                    </div>
+                </div>
+            </div>
+{#            第四行#}
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="product_name"><b>商品名称：</b></label>
+                <div class="layui-input-inline">
+                    <input type="text" id="product_name" name="product_name" class="layui-input">
+                    <span class="error-msg" style="color:red; position: absolute"></span>
+                </div>
+                <label class="layui-form-label" for="price"><b>商品价格：</b></label>
+                <div class="layui-input-inline">
+                    <input type="text" id="price" name="price" class="layui-input">
+                </div>
+            </div>
+{#            第五行#}
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="payment_method"><b>付款方式：</b></label>
+                <div class="layui-input-inline">
+                    <input type="text" id="payment_method" name="payment_method" class="layui-input">
+                </div>
+                <label class="layui-form-label" for="jf_date"><b>进粉日期：</b></label>
+                <div class="layui-input-inline">
+                    <input type="text" id="jf_date" name="jf_date" class="layui-input" placeholder="请选择日期">
+                </div>
+            </div>
+{#            第六行#}
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="jz_name"><b>金主姓名：</b></label>
+                <div class="layui-input-inline">
+                    <input type="text" id="jz_name" name="jz_name" class="layui-input">
+                </div>
+                <label class="layui-form-label" for="remarks"><b>八字/供灯：</b></label>
+                <div class="layui-input-inline">
+                    <input type="text" id="remarks" name="remarks" class="layui-input">
+                </div>
+            </div>
+{#            第七行#}
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="write_state"><b>书写状态：</b></label>
+                <div class="layui-input-inline">
+                    <select id="write_state" name="write_state" lay-search="">
+                        <option value="">请选择</option>
+                        <option value="已书写">已书写</option>
+                        <option value="未书写">未书写</option>
+                    </select>
+                </div>
+                <label class="layui-form-label" for="kg_date"><b>开光日期：</b></label>
+                <div class="layui-input-inline">
+                    <input type="text" id="kg_date" name="kg_date" class="layui-input" placeholder="请选择日期">
+                </div>
+            </div>
+{#            第八行#}
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="sy_remark"><b>寺院备注：</b></label>
+                <div class="layui-input-inline">
+                    <input type="text" id="sy_remark" name="sy_remark" class="layui-input">
+                </div>
+                <label class="layui-form-label" for="fh_remark"><b>发货备注：</b></label>
+                <div class="layui-input-inline">
+                    <input type="text" id="fh_remark" name="fh_remark" class="layui-input">
+                </div>
+            </div>
+{#            第九行#}
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="service_name"><b>客服姓名：</b></label>
+                <div class="layui-input-inline">
+                    <input type="text" id="service_name" name="service_name" class="layui-input">
+                </div>
+                <label class="layui-form-label" for="fh_data"><b>发货日期：</b></label>
+                <div class="layui-input-inline">
+                    <input type="text" id="fh_data" name="fh_data" class="layui-input" placeholder="请选择日期">
+                </div>
+            </div>
+{#            第十行#}
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="courier_number"><b>快递单号：</b></label>
+                <div class="layui-input-inline">
+                    <input type="text" id="courier_number" name="courier_number" class="layui-input">
+                    <span class="error-msg" style="color:red; position: absolute"></span>
+                </div>
+                <label class="layui-form-label" for="shipping_status"><b>发货状态：</b></label>
+                <div class="layui-input-inline">
+                    <select type="text" id="shipping_status" name="shipping_status" lay-search="">
+                        <option value="">请选择</option>
+                        <option value="在校">已发货</option>
+                        <option value="毕业">未发货</option>
+                    </select>
+                </div>
+            </div>
+{#            第十一行#}
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="number"><b>仓库库存：</b></label>
+                <div class="layui-input-inline">
+                    <input type="text" id="number" name="number" class="layui-input">
+                </div>
+            </div>
+        </form>
     </div>
 {% endblock %}
 
 {# 添加js #}
 {% block js %}
     <script>
+        // 定义查询状态值
+        let STATUS = false;
+        // 定义全局变量记录当前操作
+        let Operator = 0;
         // 入口函数
         $(function (){
             // 初始化表格
             initTable();
             // 响应按钮点击事件
             buttonClick();
+            // 初始化日期选择框
+            initDatePicker();
         });
         // 初始化函数实现
         function initTable(queryStr=""){
@@ -99,6 +240,26 @@
                     ,limit:12
                     ,limits: [12,15,20,30,50,75,100]
                 })
+
+                // 侦听表格操作
+                table.on('tool(tableComplete)',function (obj){
+                    // 获取当前行的数据
+                    let lineData = obj.data;
+                    // 判断操作
+                    if(obj.event === 'detail'){
+                        // 修改Operator
+                        Operator = 2;
+                        // 加载弹出层
+                        loadLayer("<b style='color: navy'>查看订单数据</b>")
+                    }else if (obj.event === 'edit'){
+                        // 修改Operator
+                        Operator = 3;
+                        // 加载弹出层
+                        loadLayer("<b style='color:navy'>修改订单数据</b>")
+                    }else if (obj.event === 'del'){
+                        // 删除
+                    }
+                })
             })
         }
 
@@ -115,7 +276,118 @@
                 // 页面重新加载
                 location.reload();
             })
+            // 添加按钮
+            $('#btnAdd').on('click',function (){
+                // 修改 operator值
+                Operator = 1;
+                // 弹出层
+                loadLayer("<b style='color: navy'>添加订单数据</b>")
+            })
         }
+
+        // ============== 加载弹出框=============
+        function loadLayer(title, value = "") {
+            // 弹出层的按钮准备
+            let btns = ["确定", '取消'];
+            // 判断
+            if (Operator === 2) {
+                btns = ['关闭']
+            }
+            layui.use(['layer', 'form'], function () {
+                let layer = layui.layer;
+                let form = layui.form;
+
+                layer.open({
+                    type: 1,
+                    title: title,
+                    area: ['50%', '80%'],
+                    content: $('.layerArea'),
+                    btn: btns,
+                    resize: false,
+                {#    ========函数==========#}
+                    success: function (index,layero){
+
+                    },
+                    yes: function (index,layero){
+                        if (Operator === 2) {
+                            layer.close(index);
+                            {#return;#}
+                        }
+
+                        // 进行表单验证 提交
+                        if(checkInput()){
+                            // 提交
+                        }
+                    }
+
+
+
+                })
+            })
+        }
+
+        // 初始化日期选择框
+        function initDatePicker() {
+            layui.use('laydate',function (){
+                // 实例化
+                let laydate = layui.laydate;
+                // 渲染
+                laydate.render({
+                    elem: ('#order_date')
+                })
+                laydate.render({
+                    elem: ('#jf_date')
+                })
+                laydate.render({
+                    elem: ('#kg_date')
+                })
+                laydate.render({
+                    elem: ('#fh_data')
+                })
+            })
+        }
+
+        // 提交前的 验证  姓名、电话、地址
+        function checkInput() {
+            // 清空所有的报错
+            $('.error-msg').test("")
+            // 定义变量
+            let checkResult = true;
+            // 验证姓名
+            if ($('#sj_name').val().trim().length == 0) {
+                checkResult = false;
+                $('#sj_name').next().text("姓名不能为空！");
+            }
+            // 验证手机号
+            let sj_mobile = $('#sj_mobile').val().trim();
+            if (sj_mobile.match(/^[1]\d{10}$/) == null) {
+                checkResult = false;
+                $('#sj_mobile').next().text("手机必须要是11位数字");
+            }
+            // 验证订单编号
+            if ($('#order_number').val().trim().length == 0) {
+                checkResult = false;
+                $('#order_number').next().text("订单编号不能为空！");
+            }
+            // 验证商品名称
+            if ($('#product_name').val().trim().length == 0) {
+                checkResult = false;
+                $('#product_name').next().text("商品名称不能为空！");
+            }
+            // 验证快递单号
+            if ($('#courier_number').val().trim().length == 0) {
+                checkResult = false;
+                $('#courier_number').next().text("快递单号不能为空！");
+            }
+            // 验证住址
+            if ($('#sj_address').val().trim().length == 0) {
+                checkResult = false;
+                $('#sj_address').next().text("家庭地址不能为空！");
+            }
+            return checkResult
+
+        }
+
 
     </script>
 {% endblock %}
