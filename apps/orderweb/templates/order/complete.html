@@ -153,8 +153,8 @@
                 <div class="layui-input-inline">
                     <select type="text" id="shipping_status" name="shipping_status" lay-search="">
                         <option value="">请选择</option>
-                        <option value="在校">已发货</option>
-                        <option value="毕业">未发货</option>
+                        <option value="已发货">已发货</option>
+                        <option value="未发货">未发货</option>
                     </select>
                 </div>
             </div>
@@ -255,9 +255,10 @@
                         // 修改Operator
                         Operator = 3;
                         // 加载弹出层
-                        loadLayer("<b style='color:navy'>修改订单数据</b>")
+                        loadLayer("<b style='color:navy'>修改订单数据</b>",lineData)
                     }else if (obj.event === 'del'){
                         // 删除
+                        deleteValue(lineData);
                     }
                 })
             })
@@ -306,9 +307,28 @@
                 {#    ========函数==========#}
                     success: function (index,layero){
                         // console.log(value)
-                        // 赋值 查看修改
+                        // 1. 赋值 查看修改
                         if(Operator===3 || Operator===2){
-                            form.val('layerForm',value)
+                            form.val('layerForm',value);
+                            /* 联级选项
+                            * // 重新渲染
+                            form.render();
+                            // 赋值专业
+                            $('<option>').attr('value', value.major).text(value.major__name).appendTo('#major');
+                            form.val('layerForm', {
+                                major: value.major,
+                            });
+                            // 重新渲染
+                            form.render();
+                            *
+                            * */
+
+                        }
+                        // 2. 禁用 或只读
+                        if(Operator===2){
+                            $('#layerForm').find('input,select').prop('disabled',true)
+                        } else if(Operator===3){
+                            $('#order_number').attr('readonly',true)
                         }
                     },
                     yes: function (index,layero){
@@ -324,6 +344,8 @@
                              let commitURL = "";
                              if(Operator === 1){
                                  commitURL = "{% url 'add_complete' %}";
+                             } else if(Operator ===3) {
+                                 commitURL = "{% url 'edit_complete' %}";
                              }
                              // 使用 ajax提交
                             $.ajax({
@@ -348,10 +370,37 @@
                                 }
                             })
                         }
+                    },
+
+                    // 回调函数
+                    end: function (index,layero){
+                        $('#layerForm').find('input,select').prop('disabled',false)
+                        // 把主键改为正常可编辑模式
+                        $('#order_number').attr('readonly',false)
+                        // 将表单置空
+                        form.val('layerForm', {
+                            order_number: "",
+                            sj_name: "",
+                            sj_mobile: "",
+                            order_date: "",
+                            sj_address: "",
+                            product_name: "",
+                            price: "",
+                            payment_method: "",
+                            jf_date: "",
+                            jz_name: "",
+                            remarks: "",
+                            write_state: "",
+                            kg_date: "",
+                            sy_remark: "",
+                            fh_remark: "",
+                            service_name: "",
+                            fh_data: "",
+                            courier_number: "",
+                            shipping_status: "",
+                            number: "",
+                        })
                     }
-
-
-
                 })
             })
         }
@@ -435,6 +484,40 @@
             }
             return checkResult
 
+        }
+
+        // 数据的删除
+        function deleteValue(value){
+            // 确认的提示
+            let confirmStr = "您确认删除订单编号为【" + value.order_number + "-" + value.sj_name + "】的订单信息吗"
+            // 确认
+            layui.use('layer',  function (){
+                layer.confirm(confirmStr, {icon:3,area:['450px','200px']},function (index){
+                    // ajax 请求
+                    $.ajax({
+                        url: "{% url 'del_complete' %}",
+                        method: "post",
+                        data: {
+                            order_number: value.order_number,
+                            csrfmiddlewaretoken: "{{ csrf_token }}"
+                        },
+                        dataType: 'json',
+                        success: function (res){
+                            if(res.status){
+                                location.reload();
+                            } else {
+                                layer.msg(res.error, {
+                                    icon: 2,
+                                    area: ['350px', '150px'],
+                                    time: -1,
+                                    btn: ['关闭']
+                                });
+                            }
+                        }
+
+                    })
+                })
+            })
         }
 
 

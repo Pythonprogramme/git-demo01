@@ -8,6 +8,8 @@ urlpatterns = [
     path('complete/list/', complete.list_values, name="list_complete"),# http://127.0.0.1:8000/order/complete/list/
     path('complete/order_number/exists', complete.is_order_number_exists, name="is_order_number_exists"),
     path('complete/add/', complete.add_value, name="add_complete"),
+    path('complete/edits/', complete.edit_value, name="edit_complete"),
+    path('complete/del/', complete.del_value, name="del_complete"),
 
 
     # 财务信息

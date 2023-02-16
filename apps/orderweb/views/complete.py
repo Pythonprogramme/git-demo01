@@ -60,4 +60,51 @@ def add_value(request):
                              shipping_status = rec['shipping_status'],number = rec['number'])
         return JsonResponse({'status': True})
     except Exception as e:
-        return JsonResponse({'status': False,'eeror':'添加订单数据到数据库出现异常，具体原因：'+str(e)})
+        return JsonResponse({'status': False,'error':'添加订单数据到数据库出现异常，具体原因：'+str(e)})
+
+# 修改订单数据
+def edit_value(request):
+    # 接收传递的值
+    rec = request.POST
+    # 修改
+    try:
+        # 获取当前对象
+        obj = Order.objects.get(order_number=rec['order_number'])
+        # 逐一修改属性
+        obj.sj_name = rec.get('sj_name')
+        obj.sj_mobile = rec['sj_mobile']
+        obj.order_date = rec['order_date']
+        obj.sj_address = rec['sj_address']
+        obj.product_name = rec['product_name']
+        obj.price = rec['price']
+        obj.payment_method = rec['payment_method']
+        obj.jf_date = rec['jf_date']
+        obj.jz_name = rec['jz_name']
+        obj.remarks = rec['remarks']
+        obj.write_state = rec['write_state']
+        obj.kg_date = rec['kg_date']
+        obj.sy_remark = rec['sy_remark']
+        obj.fh_remark = rec['fh_remark']
+        obj.service_name = rec['service_name']
+        obj.fh_data = rec['fh_data']
+        obj.courier_number = rec['courier_number']
+        obj.shipping_status = rec['shipping_status']
+        obj.number = rec['number']
+        #  保存
+        obj.save()
+        return JsonResponse({'status': True})
+    except Exception as e:
+        return JsonResponse({'status': False, 'error': '修改订单数据到数据库出现异常，具体原因：' + str(e)})
+
+# 删除订单数据
+def del_value(request):
+    # 接收传递的值
+    order_number = request.POST.get('order_number')
+    # 修改
+    try:
+        # 获取当前对象
+        Order.objects.get(order_number=order_number).delete()
+        return JsonResponse({'status': True})
+    except Exception as e:
+        return JsonResponse({'status': False, 'error': '删除订单数据到数据库出现异常，具体原因：' + str(e)})
+
