@@ -250,7 +250,7 @@
                         // 修改Operator
                         Operator = 2;
                         // 加载弹出层
-                        loadLayer("<b style='color: navy'>查看订单数据</b>")
+                        loadLayer("<b style='color: navy'>查看订单数据</b>",lineData)
                     }else if (obj.event === 'edit'){
                         // 修改Operator
                         Operator = 3;
@@ -286,7 +286,7 @@
         }
 
         // ============== 加载弹出框=============
-        function loadLayer(title, value = "") {
+        function loadLayer(title,value="") {
             // 弹出层的按钮准备
             let btns = ["确定", '取消'];
             // 判断
@@ -296,7 +296,6 @@
             layui.use(['layer', 'form'], function () {
                 let layer = layui.layer;
                 let form = layui.form;
-
                 layer.open({
                     type: 1,
                     title: title,
@@ -306,17 +305,48 @@
                     resize: false,
                 {#    ========函数==========#}
                     success: function (index,layero){
-
+                        // console.log(value)
+                        // 赋值 查看修改
+                        if(Operator===3 || Operator===2){
+                            form.val('layerForm',value)
+                        }
                     },
                     yes: function (index,layero){
                         if (Operator === 2) {
                             layer.close(index);
-                            {#return;#}
+                            return;
                         }
-
+                        // 清空所有的报错
+                         $('.error-msg').empty()
                         // 进行表单验证 提交
                         if(checkInput()){
                             // 提交
+                             let commitURL = "";
+                             if(Operator === 1){
+                                 commitURL = "{% url 'add_complete' %}";
+                             }
+                             // 使用 ajax提交
+                            $.ajax({
+                                url: commitURL,
+                                method: 'post',
+                                data: $('#layerForm').serialize(),
+                                dataType: 'json',
+                                success: function (res){
+                                    if(res.status){
+                                        location.reload();
+                                    }else {
+                                        layui.use('layui', function () {
+                                         layer.msg(res.error,
+                                             {
+                                                 icon: 2,
+                                                 area: ['350px', '150px'],
+                                                 time: -1,
+                                                 btn: ['关闭']
+                                             });
+                                        })
+                                    }
+                                }
+                            })
                         }
                     }
 
@@ -349,10 +379,33 @@
 
         // 提交前的 验证  姓名、电话、地址
         function checkInput() {
-            // 清空所有的报错
-            $('.error-msg').test("")
+
             // 定义变量
             let checkResult = true;
+            // 验证订单编号
+            if ($('#order_number').val().trim().length == 0) {
+                checkResult = false;
+                $('#order_number').next().text("订单编号不能为空！");
+            }
+            // 判断订单编号是否存在 （仅添加）
+            if(Operator ===1){
+                $.ajax({
+                    url: '{% url 'is_order_number_exists' %}',
+                    method: 'post',
+                    data: {
+                        order_number: $('#order_number').val().trim(),
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    },
+                    dataType: 'json',
+                    success: function (res){
+                        if(res.data){
+                            checkResult = false;
+                            $('#order_number').next().text("订单编号已经存在");
+                        }
+                    }
+                })
+            }
+
             // 验证姓名
             if ($('#sj_name').val().trim().length == 0) {
                 checkResult = false;
@@ -364,11 +417,7 @@
                 checkResult = false;
                 $('#sj_mobile').next().text("手机必须要是11位数字");
             }
-            // 验证订单编号
-            if ($('#order_number').val().trim().length == 0) {
-                checkResult = false;
-                $('#order_number').next().text("订单编号不能为空！");
-            }
+
             // 验证商品名称
             if ($('#product_name').val().trim().length == 0) {
                 checkResult = false;
