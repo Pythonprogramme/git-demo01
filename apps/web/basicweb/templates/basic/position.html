@@ -1,0 +1,312 @@
+{#    引入basic公共模板#}
+{% extends 'layout/basic_base_page.html' %}
+{% block title %} 人员职位  {% endblock %}
+{# 添加当前页面的css#}
+{% block css %}
+{% endblock %}
+{# 添加面包屑导航名称#}
+{% block breadcrumb %}
+    人员职位
+ {% endblock %}
+{# 添加当前页面的内容#}
+{% block content %}
+{#    基本信息#}
+    <table class="layui-hide" id="tableArea" lay-filter="tableDemo"></table>
+{#  表格中的按钮#}
+    <script type="text/html" id="tableButton">
+      <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit">
+          <i class="layui-icon layui-icon-edit"></i> 编辑
+      </a>
+      <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">
+          <i class="layui-icon layui-icon-delete"></i> 删除
+      </a>
+    </script>
+
+{#   弹出层内容#}
+    <div id="layerContent" style="display: none; padding: 30px 40px 0 0">
+        <form action="" class="layui-form" id="layerForm" lay-filter="layerForm">
+            <div class="layui-form-item">
+                <label  class="layui-form-label" for="company">部门名称：</label>
+                <div class="layui-input-block">
+{#                    <input type="text" id="company" name="company" class="layui-input">#}
+                    <select name="company" id="company" lay-search="">
+
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item" style="display: none">
+                <label  class="layui-form-label" for="position_id">岗位编号：</label>
+                <div class="layui-input-block">
+                    <input type="text" id="position_id" name="position_id" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label  class="layui-form-label" for="position">岗位名称：</label>
+                <div class="layui-input-block">
+                    <input type="text" id="position" name="position" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label  class="layui-form-label" for="position_name">员工姓名：</label>
+                <div class="layui-input-block">
+                    <input type="text" id="position_name" name="position_name" class="layui-input">
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+{# 添加当前页面的js#}
+{% block js %}
+    <script>
+        // 定义一个全局变量标识是添加还是修改 1-添加 2-修改
+        let Operation = 0;
+        // 入口函数
+        $(function (){
+            // 初始化表格
+            initTable();
+            // 响应按钮点击事件
+            buttonClick()
+        })
+        // 初始化表格
+        function initTable(queryStr=''){
+            // 使用 table 插件
+            layui.use('table',function (){
+                // 实例化一个表格对象
+                let table =layui.table;
+                // 开始渲染表格
+                table.render({
+                    elem: '#tableArea'
+                    // 请求数据后台接口
+                    ,url: "{% url 'list_position' %}"
+                    ,method: 'post'
+                    ,where: {
+                        inputStr: queryStr,
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    }
+                    // 不同行背景不同显示
+                    ,even: true // 表格斑马线效果
+                    ,cols: [[
+                        {type:'numbers', width:60, align: 'center', title: '编号', sort: true}
+                        ,{field:'company__name', width:280,align: 'center', title: '部门名称',sort: true}
+                        ,{field:'name', title: '职位名称', align: 'center',sort: true}
+                        ,{field:'Personal_name', title: '员工姓名', align: 'center',sort: true}
+                        ,{fixed: 'right', title: '操作',width:'20%', align:'center', toolbar: '#tableButton'}
+                    ]]
+                    // **是否显示顶部工具栏 （可直接导出）
+                    ,toolbar: true
+                    // 分页显示
+                    ,page: true
+                    /* 指定数据显示条数
+                    * limit: 12
+                    * limits: [12,15,20,30,50,75,100]
+                    * */
+                    // 加载数据异常时的提示
+                    ,text: '加载数据出现异常，请联系管理员！'
+                    // 表头样式显示
+                    ,done: function (res, current, count){
+                        $('thead tr').css({'background-color': '#009688','color': 'white'})
+                    }
+                })
+                // 侦听表格的操作 --按钮点击
+                table.on('tool(tableDemo)', function (obj){
+                    // 获取操作行数据
+                    let oneLineData = obj.data;
+                    // 判断是点击什么按钮
+                    if(obj.event === 'edit'){
+                        // 编辑按钮
+                        Operation = 2;
+                        {#alert(oneLineData.name+oneLineData.Personal_name)#}
+                        loadLayer(oneLineData);
+                    } else if (obj.event === 'del'){
+                        // 删除按钮
+                        {#alert('点击了删除按钮')#}
+                        deleteValue(oneLineData);
+                    }
+                })
+            })
+        }
+
+        // 响应按钮点击事件
+        function buttonClick() {
+            // 查询按钮
+            $('#btnQuery').on('click',function (){
+                // 获取文本框的值
+                let inputStr = $('#queryStr').val()
+                initTable(inputStr)
+            })
+            // 全部按钮
+            $('#btnAll').on('click',function (){
+                // 页面重新加载
+                location.reload();
+            })
+            // 添加按钮
+            $('#btnAdd').on('click',function (){
+                // 修改Openstion
+                Operation = 1;
+                // 加载弹出层
+                loadLayer();
+            })
+        }
+        // 展示加载 弹出层
+        function loadLayer(value=''){
+            // 判断是添加还是修改
+            let titleStr = ''
+            if(Operation === 1 ){
+                titleStr = '添加数据'
+            }else if(Operation === 2){
+                titleStr = '修改数据'
+            }
+             layui.use(['layer','form'],function (){
+            // 实例化一个弹出层对象
+                let layer = layui.layer;
+                let form = layui.form;
+                // 展示
+                layer.open({
+                    type:  1,
+                    title: titleStr,
+                    area: ['40%','40%'],
+                    btn: ['确定','取消'],
+                    content: $('#layerContent'),
+                    // 设置弹出层的其他区域的颜色
+                    shade: [0.6, '#000000'],
+                    // 点击其他区域是否关闭弹窗层
+                    shadeClose: false,
+                    // 弹出框入场动画
+                    anim: 5,
+                    resize:  false,
+                    // 响应的函数
+                    success:  function (layero, index){
+                        // 弹出层加载后自动执行的回调函数
+                        // 自动获取所有部门信息
+                        $.ajax({
+                            url: '{% url 'list_company' %}',
+                            method: 'get',
+                            dataType: 'json',
+                            success: function (res){
+                                if (res.status){
+                                    // 获取要放置的父容器
+                                    let parentCentainer = $('#company')
+                                    // 清空下拉选项
+                                    parentCentainer.html("");
+                                    //使用 jquery 拼接成 option标签写入 select
+                                    $('<option>').attr('value', '').text("请在现有的部门中直接选择或搜索选择").appendTo(parentCentainer)
+                                    //遍历
+                                    $.each(res.data, function (index, value){
+                                        // 使用 jquery创建option标签
+                                        $('<option>').attr('value', value.id).text(value.name).appendTo(parentCentainer);
+                                    })
+                                    // 修改时 ---为表单 赋值
+                                    if(Operation === 2){
+                                        form.val('layerForm', {
+                                            'company' : value.company_id,
+                                            'position': value.name,
+                                            'position_name': value.Personal_name,
+                                            'position_id': value.id
+
+                                        })
+                                    }
+                                    // 重新渲染表单
+                                    form.render();
+                                } else {
+                                    layer.msg('部门信息获取失败：',{icon:2, area: ['350px','150px'], time: -1, btn: ['关闭']})
+                                }
+                            }
+                        })
+                    },
+                    // 确定按钮回调方法
+                    yes: function (index,layero){
+                        // 点击确定按钮的事件响应
+                        // 添加的提交
+                        if(Operation === 1){
+                            // 添加的提交
+                            $.ajax({
+                            url: '{% url 'add_position' %}',
+                            method: 'post',
+                            data: $('#layerForm').serialize(),
+                            dataType: 'json',
+                            success: function (res){
+                                if (res.status){
+                                    // 重新加载页面
+                                    location.reload();
+                                } else {
+                                    // 错误提示
+                                    layer.msg(res.error,{icon:2, area: ['350px','150px'], time: -1, btn: ['关闭']})
+                                }
+                            }
+                        })
+                        } else if (Operation ===2){
+                            // 修改的提交
+                            $.ajax({
+                            url: '{% url 'edit_position' %}',
+                            method: 'post',
+                            data: $('#layerForm').serialize(),
+                            dataType: 'json',
+                            success: function (res){
+                                if (res.status){
+                                    // 重新加载页面
+                                    location.reload();
+                                } else {
+                                    // 错误提示
+                                    layer.msg(res.error,{icon:2, area: ['350px','150px'], time: -1, btn: ['关闭']})
+                                }
+                            }
+                        })
+                        }
+
+                    },
+                    btn1: function (index,layero){
+                        // 点击第一个按钮的事件响应
+
+                    },
+                    btn2: function (index,layero){
+                        // 点击第二个按钮的事件响应
+
+                    },
+                    cancel: function (index,layero){
+                        // 点击右上角‘x’按钮的事件响应
+
+                    },
+                    end: function (index,layero){
+                        // 弹出层销毁后自动执行的函数
+                        form.val('layerForm', {
+                            // 弹出层置空
+                            'company' : -1,
+                            'position': '',
+                            'position_name': '',
+                            'position_id': ''
+                        })
+                    }
+                })
+        })
+        }
+        // 实现数据的删除
+        function deleteValue(value){
+            // 用户确认
+            layui.use('layer',function (){
+                // 删除确认的字符串
+                let confirmStr = "您确认删除 专业【" + value.id + "-" + value.name+"】数据吗？"
+                // 用户确认
+                layer.confirm(confirmStr,{icon:3, area:['350px','200px']}, function (index){
+                    // 实现 Ajax
+                    $.ajax({
+                        url: '{% url 'del_position' %}',
+                        method: 'POST',
+                        data: {
+                            id: value.id,
+                            csrfmiddlewaretoken: "{{ csrf_token }}"
+                        },
+                        dataType: 'json',
+                        success: function (res){
+                            if(res.status){
+                                location.reload();
+                            } else {
+                                layer.msg(res.error, {icon: 2,area:['350px','150px'],item: -1, btn: ['关闭']})
+                            }
+                        }
+                    })
+                })
+            })
+        }
+    </script>
+
+{% endblock %}

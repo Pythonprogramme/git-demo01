@@ -18,7 +18,7 @@ import sys
 BASE_DIR = Path(__file__).resolve().parent.parent
 # 添加目录
 sys.path.append(os.path.join(BASE_DIR,'apps'))
-
+sys.path.append(os.path.join(BASE_DIR,'apps','web'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'basicweb',
     'mainweb',
-    'orderweb'
+    'orderweb',
+    'userweb'
 ]
 
 MIDDLEWARE = [
@@ -61,7 +62,9 @@ ROOT_URLCONF = 'gitdemo01.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR,'apps','resources_base','templates_base')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

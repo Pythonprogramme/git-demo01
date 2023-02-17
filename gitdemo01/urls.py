@@ -26,9 +26,11 @@ from django.urls import include
 urlpatterns = [
     path('admin/', admin.site.urls),
 #   基础数据
-    path('basic/',include('apps.basicweb.urls')),
+    path('basic/', include('basicweb.urls')),
 #   用户角色
-    path('main/',include('apps.mainweb.urls')),
+    path('main/', include('mainweb.urls')),
 #   订单管理
-    path('order/',include('apps.orderweb.urls'))
+    path('order/', include('orderweb.urls')),
+#   登录账号
+    path('user/', include('userweb.urls'))
 ]
